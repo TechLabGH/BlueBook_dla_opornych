@@ -1,0 +1,49 @@
+```C
+#include <avr/io.h>      // Standard include for AVR
+#include <util/delay.h>  // Delay functions
+
+#define LED_PIN (1<<PC7)           //definicja pinu, do ktorego podlaczona jest dioda
+#define LED_TOG PORTC ^=  LED_PIN  //makrodefinicja - zmiana stanu pinu diody
+
+#define KEY_PIN (1<<PC6)           //definicja pinu, do ktorego podlaczony jest przycisk
+#define KEY_DOWN !(PINC & KEY_PIN) //makro spardzajace czy przycisk jest wcisniery (stan wysoki na pinie)
+
+int main(void) {
+
+	DDRC |= LED_PIN;    //kierunek pinu - wyjscie
+	PORTC ^= LED_PIN;   //wylaczenie diody led
+	DDRC &= ~KEY_PIN;   //kierunek pinu - wejscie
+	PORTC |= KEY_PIN;   //wewnetrzne podciogniecie pinu przycisku
+
+	while(1)
+	{
+		if ( KEY_DOWN ) {
+			_delay_ms(80);
+			if ( KEY_DOWN ) {
+				LED_TOG;
+				_delay_ms(200);
+			}
+		}
+	}
+
+
+}
+```
+
+---
+PC7 jest zdefiniowane w <avr/io.h> i dla ATmegi32 oznacza tak naprawdę... 7. Więc LEDPIN = (1<<PC7) = 0b10000000
+---
+PORTC - bajt zawierający stany każdego pinu Portu_C mikrokontrolera. 
+Zmieniające je programowo można ustawiać stan na pinach wyjściowych; odczytując, można sprawdzić stana na pinach wejściowych.
+
+PORTC ^= LED_PIN to skrócony zapis PORTC = PORTC ^ LED_PIN (sumowanie bitowe modulo 2)
+Po polsku - tam, gdzie bajt LED_PIN ma "1", tam odpowiadający bit w PORTC jest zmieniany na przeciwny, a pozostałe pozostają niezmienione
+
+```C
+PORTC:           | b7 | b6 | b5 | b4 | b3 | b2 | b1 | b0 |
+LED_PIN:         | 1  | 0  | 0  | 0  | 0  | 0  | 0  | 0  |
+
+PORTC^LED_PIN:   |~b7 | b6 | b5 | b4 | b3 | b2 | b1 | b0 |
+```
+
+Czyli przy każdym wywołaniu, zmieniamy stan na pinie wyjściowym B7.
