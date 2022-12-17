@@ -107,6 +107,42 @@ To niestety mniej popularna wersja tego wyświetlacza, natomiast dużo prostrza 
 |00 <---  linia 1 --->  0F||10     znaki ukryte    4F|
 +-------------------------++-------------------------+
 
+
+16x2 LCD
+Tutaj mala uwaga. Sprawdzilem dwa z posiadanych wyswietlaczy 16x2 i oba maja inne rodzaje adresowania. W kodzie ponizej uzylem rozwiadania, ktore dziala dla mnie, ale jesli dziala ci tylko polowa wyswietlacza, to nalezy 
+zmienic ustawienia
+
+Moj wyswietlacz:
+|1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|00|01|02|03|04|05|06|07|08|09|0A|0B|0C|0D|0E|0F|
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|40|41|42|43|44|45|46|47|48|49|4A|4B|4C|4D|4E|4F|
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
++-------------------------++-------------------------+
+|00  <--- linia 1 --->  0F||10    linia 1 ukryta   27|
++-------------------------++-------------------------+
+|40  <--- linia 2 --->  4F||50    linia 2 ukryta   67|
++-------------------------++-------------------------+
+
+Drugi wyswietlacz - konfiguracja nie sprawdzona
+|1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+|00|01|02|03|04|05|06|07|14|15|16|17|18|19|1A|1B|
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--'
+|48|49|4A|4B|4C|4D|4E|4F|54|55|56|57|58|59|5A|5B|
++--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+
++-------------------------++-------------------------++-------------------------++-------------------------+
+|00 <--- linia 1 L ---> 0F||10   linia 1 L ukryta  13||14 <--- linia 1 R ---> 1B||1C   linia 1 R ukryta  27|
++-------------------------++-------------------------++-------------------------++-------------------------+
+|40 <--- linia 2 L ---> 4F||50   linia 2 L ukryta  53||54 <--- linia 2 R ---> 5B||5C   linia 2 R ukryta  67|
++-------------------------++-------------------------++-------------------------++-------------------------+
+
+Takie rozlozenie DDRAM dosc bardzo komplikuje sprawe i nie chcialo mi sie tego testowac. Chyba najlatwiej byloby traktowac go jak wyswietlacz 20x4 pokazany wyzej na ktorym widoczne jest tylko 8 lewych znakow, linia 3 jest
+kontynuacja pierwszej, a czwarta - drugiej.
+
 16x4 LCD
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
@@ -122,7 +158,7 @@ To niestety mniej popularna wersja tego wyświetlacza, natomiast dużo prostrza 
 +-----------------------+-----------------------+--------------------+
 |00 <--- linia 1 ---> 0F|10 <--- linia 3 ---> 1F|20  znaki ukryte  27|
 +-----------------------+-----------------------+--------------------+
-|00 <--- linia 2 ---> 0F|10 <--- linia 4 ---> 1F|20  znaki ukryte  27|
+|40 <--- linia 2 ---> 4F|50 <--- linia 4 ---> 5F|60  znaki ukryte  67|
 +-----------------------+-----------------------+--------------------+
 
 Tu wprawdzie wpisuje się tekst łatwiej, ale przy przesunięciu, zawsze przesuwają się dwie linie.
@@ -203,6 +239,15 @@ analogicznie 0x81->0x01, 0x82->0x02 itd
 właśnie temu służy tak sprytnie zapisana instrukcja if: (znak>=0x80 && znak<=87) ? (znak & 0x07) : znak - możemy ją wpleść w wywołanie funkcji lcd_write_data, zamiast tworzyc osobną zmienną ustawianą w tradycyjnej instrukcji if-else.
 
 ====================================================================================================================
+!!!!!!!!!!!!!
+    UWAGA
+!!!!!!!!!!!!!
+Jesli po kompilacji i zaprogramowaniu programu, odczyt z pamieci EEPROM moze nie dzialac. Jak to poznac?
+tekst EEPROM, ktory powinien byc odczytany z pamieci i wyswietlony nie jast, a mapa bajtow, ktora odczytana z EEPROMa powinna stworzyc znak z emotka, jest cala "czarna".
+Oznacza to, ze zawartosc EEPROMu nie zostala wgrana. Podczas kompilacji w katalogu Release tworzony jest plik *.eep, ktory powinien byc zaladowany tak samo jak *.hex jest
+programowany w pamieci FLASH. W tym wypadku zaznaczamy projekt; Menu Project - Properties - AVR - AVRDude - zakladka Flash/EEPROM - i zaznaczamy opcje Upload EEPROM image: From build.
+====================================================================================================================
+
 main.c
 
 
@@ -909,8 +954,8 @@ lcd44780.h
 #endif
 
 #if ( (LCD_ROWS == 2) && (LCD_COLS == 16) )
-#define LCD_LINE1 0x00                        // lewe 8 znakow
-#define LCD_LINE2 0x40                        // prawe 8 znakow
+#define LCD_LINE1 0x00
+#define LCD_LINE2 0x40
 #endif
 
 #if ( (LCD_ROWS == 4) && (LCD_COLS == 16) )
