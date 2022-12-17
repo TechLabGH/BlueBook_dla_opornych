@@ -1,4 +1,5 @@
-Jeśli ktoś nie miał okazji dłużej pobawić się z wyświetlaczami alfanumerycznymi LCD bazującymi na układzie 44780, albo obsługiwał je wyłącznie z arduino, o wielu funkcjach tego układu może nawet nie miec pojecia.
+Jeśli ktoś nie miał okazji dłużej pobawić się z wyświetlaczami alfanumerycznymi LCD bazującymi na układzie 44780, albo obsługiwał je wyłącznie z arduino, 
+o wielu funkcjach tego układu może nawet nie miec pojecia.
 
 Na własne potrzeby przeczytałem pełną notę katalogową układu i zamieszczam swoje notatki
 
@@ -6,7 +7,8 @@ HD44780 posiada dwa 8-bitowe rejestry:
  - rejestr instrukcji - IR (instruction register)
  - rejestr danych - DR (data register)
 
-Rejestr instrukcji może być zapisany tylko z zewnątrz (przez MPU). Do rego rejestru wpisywane są komendy, albo adresy rejestru danych do którego są wpisywane, albo z którego czytane dane.
+Rejestr instrukcji może być zapisany tylko z zewnątrz (przez MPU). Do rego rejestru wpisywane są komendy, albo adresy rejestru danych do którego są wpisywane, 
+albo z którego czytane dane.
 Rejestr danych może być zapisany przez MPU (jako wejście danych) lub sam układ (jako wyjście danych odczytywanych z wyświetlacza).
 
 Poniżej tabelka, która trochę lepiej wyjaśnia, jak działają linie RS i RW:
@@ -17,9 +19,14 @@ Poniżej tabelka, która trochę lepiej wyjaśnia, jak działają linie RS i RW:
  1   0     Zapis do rejestru danych (DR)
  1   1     Odczyt z rejestru danych (DR)
 
-Licznik adresów (Address counter AC) - Przechowuje adres pamięci DDRAM lub CGRAM do którego wpisujemy lub z którego czytamy dane. Po każdej takiej operacji jego wartość sama się inkrementuje (przy wpisywaniu) albo dekrementuje (przy odczycie). Dzięki temu można wysłać do wyświetlacza jakiś znak wyświetlony w konkretnym miejscu, a następny znak zostanie wyświetlony automatycznie obok. 
+Licznik adresów (Address counter AC) - Przechowuje adres pamięci DDRAM lub CGRAM do którego wpisujemy lub z którego czytamy dane. Po każdej takiej operacji 
+jego wartość sama się inkrementuje (przy wpisywaniu) albo dekrementuje (przy odczycie). Dzięki temu można wysłać do wyświetlacza jakiś znak wyświetlony 
+w konkretnym miejscu, a następny znak zostanie wyświetlony automatycznie obok. 
 
-DDRAM (Display Data RAM) - ma pojemność 640 bitów / 80 bajtów (znaków). Najpopularniejsze modele mają 20x2 lub 16x2; mniej polularne 20x4 albo 40x2 więc teoretycznie nie każdy wymaga aż tak dużej pamięci. W pierwszych dwóch przypadkach wyświetlcz pokazuje tylko znaki zapisane we fragmencie pamięci. Pozostałe znaki znajdują się natomiast "na prawo" od tych wyświetlonych - jakby poza ekranem. Podczas inicjalizacji wyświetlacza, należy mu więc wysłać informację, ile linii tekstu bedzie wyświetlał.
+DDRAM (Display Data RAM) - ma pojemność 640 bitów / 80 bajtów (znaków). Najpopularniejsze modele mają 20x2 lub 16x2; mniej polularne 20x4 albo 40x2 więc 
+teoretycznie nie każdy wymaga aż tak dużej pamięci. W pierwszych dwóch przypadkach wyświetlcz pokazuje tylko znaki zapisane we fragmencie pamięci. 
+Pozostałe znaki znajdują się natomiast "na prawo" od tych wyświetlonych - jakby poza ekranem. Podczas inicjalizacji wyświetlacza, należy mu więc 
+wysłać informację, ile linii tekstu bedzie wyświetlał.
 
 Standardowe adresowanie DDRAM w HR44780:
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|
@@ -94,10 +101,12 @@ Nadal całe 80 bajtów jest programoiwalne, ale jeden zestaw jest używany do wy
 |40 <--- linia 2 PRAWA---> 47||48     znaki ukryte    67|
 +----------------------------++-------------------------+
 
-Wyświetlanie na tych wyświetlaczach wymaga dodatkowych zabiegów (nie możemy wyświetlić 9 znaków na raz bez ustawiania nowego adresu dla ostatniego znaku). Dodatkowo przesuięcia stają się dużo bardziej skomplikowane.
+Wyświetlanie na tych wyświetlaczach wymaga dodatkowych zabiegów (nie możemy wyświetlić 9 znaków na raz bez ustawiania nowego adresu dla ostatniego znaku). 
+Dodatkowo przesuięcia stają się dużo bardziej skomplikowane.
 
 16x1 LCD (typ 2)
-To niestety mniej popularna wersja tego wyświetlacza, natomiast dużo prostrza do kontrolowania, bo wykorzystuje tylko pierwszą linię pamięci, ale nie dzieli jej dodatkowo.
+To niestety mniej popularna wersja tego wyświetlacza, natomiast dużo prostrza do kontrolowania, bo wykorzystuje tylko pierwszą linię pamięci, ale nie 
+dzieli jej dodatkowo.
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |00|01|02|03|04|05|06|07|08|09|0A|0B|0C|0D|0E|0F|
@@ -109,7 +118,8 @@ To niestety mniej popularna wersja tego wyświetlacza, natomiast dużo prostrza 
 
 
 16x2 LCD
-Tutaj mala uwaga. Sprawdzilem dwa z posiadanych wyswietlaczy 16x2 i oba maja inne rodzaje adresowania. W kodzie ponizej uzylem rozwiadania, ktore dziala dla mnie, ale jesli dziala ci tylko polowa wyswietlacza, to nalezy 
+Tutaj mala uwaga. Sprawdzilem dwa z posiadanych wyswietlaczy 16x2 i oba maja inne rodzaje adresowania. W kodzie ponizej uzylem rozwiadania, ktore dziala 
+dla mnie, ale jesli dziala ci tylko polowa wyswietlacza, to nalezy 
 zmienic ustawienia
 
 Moj wyswietlacz:
@@ -140,7 +150,8 @@ Drugi wyswietlacz - konfiguracja nie sprawdzona
 |40 <--- linia 2 L ---> 4F||50   linia 2 L ukryta  53||54 <--- linia 2 R ---> 5B||5C   linia 2 R ukryta  67|
 +-------------------------++-------------------------++-------------------------++-------------------------+
 
-Takie rozlozenie DDRAM dosc bardzo komplikuje sprawe i nie chcialo mi sie tego testowac. Chyba najlatwiej byloby traktowac go jak wyswietlacz 20x4 pokazany wyzej na ktorym widoczne jest tylko 8 lewych znakow, linia 3 jest
+Takie rozlozenie DDRAM dosc bardzo komplikuje sprawe i nie chcialo mi sie tego testowac. Chyba najlatwiej byloby traktowac go jak wyswietlacz 20x4 pokazany 
+wyzej na ktorym widoczne jest tylko 8 lewych znakow, linia 3 jest
 kontynuacja pierwszej, a czwarta - drugiej.
 
 16x4 LCD
@@ -164,12 +175,14 @@ kontynuacja pierwszej, a czwarta - drugiej.
 Tu wprawdzie wpisuje się tekst łatwiej, ale przy przesunięciu, zawsze przesuwają się dwie linie.
 
 40x4 LCD
-W tych wyświetlaczach montowane są dwa układy HD44780. Każdy z nich kontroluje dwie linie, więc pierwsza i trzecia linia będą mieć identyczne adresowanie, ale zapisywane osobno w każdym z dwóch układów. 
+W tych wyświetlaczach montowane są dwa układy HD44780. Każdy z nich kontroluje dwie linie, więc pierwsza i trzecia linia będą mieć identyczne adresowanie, 
+ale zapisywane osobno w każdym z dwóch układów. 
 
 =====================================================================================================
 >>Dodatkowe znaki<<
 
-Tablica ASCI zawiera 127 "znaków" - w cudzysłowie - bo pierwsze 32 (0x00-0x1F 0-31) nie są drukowalne. Dopiero znak (0x20 - 32) oznacza spację, 33 to ! ... do 127 (0x7F), gdzie znajduje się DEL (wyjścietlany jako <- przez 44780).
+Tablica ASCI zawiera 127 "znaków" - w cudzysłowie - bo pierwsze 32 (0x00-0x1F 0-31) nie są drukowalne. Dopiero znak (0x20 - 32) oznacza spację, 33 to ! ... 
+do 127 (0x7F), gdzie znajduje się DEL (wyjścietlany jako <- przez 44780).
 
 0b        0x ASCI  0b        0x ASCI  0b        0x ASCI   
 00100000  20  SP   01000000  40  @    01100000  60  `
@@ -205,9 +218,11 @@ Tablica ASCI zawiera 127 "znaków" - w cudzysłowie - bo pierwsze 32 (0x00-0x1F 
 00111110  3E  >    01011110  5E  ^    01111110  7E  ->
 00111111  3F  ?    01011111  5F  _    01111111  7F  <-
 
-!!! Jeśli trafisz na HD44780 z wewnętrznym romem oznaczonym A02, to do dyspozycji jest aż 240 wbudowanych znaków + 8 własnych - opcja raczej nie spotykana z tanich chińskich wyświetlaczach, ale może być dostępna w jakiś z demobilu.
+!!! Jeśli trafisz na HD44780 z wewnętrznym romem oznaczonym A02, to do dyspozycji jest aż 240 wbudowanych znaków + 8 własnych - opcja raczej nie spotykana 
+z tanich chińskich wyświetlaczach, ale może być dostępna w jakiś z demobilu.
 
-Dodatkowo HD44780 ma wbudowane kolejne 96 znaków, z których większość to chińskie krzaczki ale jest tam też omega (0xF4), pi (0xF7) i kilka innych. Oczywiście istnieje też możliwość dodania własnych znaków - w dwóch rozdzielczościach:
+Dodatkowo HD44780 ma wbudowane kolejne 96 znaków, z których większość to chińskie krzaczki ale jest tam też omega (0xF4), pi (0xF7) i kilka innych. 
+Oczywiście istnieje też możliwość dodania własnych znaków - w dwóch rozdzielczościach:
 - 5x8 (do ośmiu znaków) - w tym przypadku otrzymują one adresy 0x00-0x07 i lustrzane 0x08-0x0F
 - 5x10 (do czterech znaków) - otrzymają adresy 0x00, 0x02, 0x04, 0x06 i lustrzane 0x08, 0x0A, 0x0C i 0x0E
 
@@ -233,19 +248,26 @@ Więc aby wyświetlić "Nacisnij @ aby otworzyc" (@ to miejsce naszej klodki), m
 Trochę to kłopotliwe - dobrze by było móc wpleść własny znak w jakiś string bez takich zabiegów. Nie możemy też użyć
 char txt[] = "Nacisnij ""\x0"" aby otworzyc"; bo kod asci 0 jest niedrukowalny. 
 
-Dlatego sprytny (ale kocio opisany) pomysł Mirka polega na znalezieniu ciągu 8 znaków w tych zapisanych w wyświetlaczu, ale zupełnie dla nas zbędnych - na przykład 0x80-0x87. Zazwyczaj znajdują się tam jakieś krzaczki albo nic (jeśli to oryginalny układ HITACHI). Teraz tylko trzeba sprawić, aby nasz kod, po napotkaniu znaku ASCI 128 (0x80), zamiast wysłać ten numer, wysłał 0. 
+Dlatego sprytny (ale kocio opisany) pomysł Mirka polega na znalezieniu ciągu 8 znaków w tych zapisanych w wyświetlaczu, ale zupełnie dla nas zbędnych -
+na przykład 0x80-0x87. Zazwyczaj znajdują się tam jakieś krzaczki albo nic (jeśli to oryginalny układ HITACHI). Teraz tylko trzeba sprawić, aby nasz kod, 
+po napotkaniu znaku ASCI 128 (0x80), zamiast wysłać ten numer, wysłał 0. 
 analogicznie 0x81->0x01, 0x82->0x02 itd
 
-właśnie temu służy tak sprytnie zapisana instrukcja if: (znak>=0x80 && znak<=87) ? (znak & 0x07) : znak - możemy ją wpleść w wywołanie funkcji lcd_write_data, zamiast tworzyc osobną zmienną ustawianą w tradycyjnej instrukcji if-else.
+właśnie temu służy tak sprytnie zapisana instrukcja if: (znak>=0x80 && znak<=87) ? (znak & 0x07) : znak - możemy ją wpleść w wywołanie funkcji lcd_write_data, 
+zamiast tworzyc osobną zmienną ustawianą w tradycyjnej instrukcji if-else.
 
 ====================================================================================================================
 !!!!!!!!!!!!!
     UWAGA
 !!!!!!!!!!!!!
-Jesli po kompilacji i zaprogramowaniu programu, odczyt z pamieci EEPROM moze nie dzialac. Jak to poznac?
-tekst EEPROM, ktory powinien byc odczytany z pamieci i wyswietlony nie jast, a mapa bajtow, ktora odczytana z EEPROMa powinna stworzyc znak z emotka, jest cala "czarna".
-Oznacza to, ze zawartosc EEPROMu nie zostala wgrana. Podczas kompilacji w katalogu Release tworzony jest plik *.eep, ktory powinien byc zaladowany tak samo jak *.hex jest
-programowany w pamieci FLASH. W tym wypadku zaznaczamy projekt; Menu Project - Properties - AVR - AVRDude - zakladka Flash/EEPROM - i zaznaczamy opcje Upload EEPROM image: From build.
+Po kompilacji i zaprogramowaniu, odczyt z pamieci EEPROM moze nie dzialac. 
+Jak to poznac?
+tekst EEPROM, ktory powinien byc odczytany z pamieci i wyswietlony nie jast, a mapa bajtow, ktora odczytana z EEPROMa powinna stworzyc znak z emotka, jest 
+cala "czarna".
+Oznacza to, ze zawartosc EEPROMu nie zostala wgrana. Podczas kompilacji w katalogu Release tworzony jest plik *.eep, ktory powinien byc zaladowany tak 
+samo jak *.hex jest
+programowany w pamieci FLASH. W tym wypadku zaznaczamy projekt; Menu Project - Properties - AVR - AVRDude - zakladka Flash/EEPROM - i zaznaczamy opcje 
+Upload EEPROM image: From build.
 ====================================================================================================================
 
 main.c
@@ -803,8 +825,8 @@ void lcd_blink_off(void)
 // *** funkcja inicjucaca wyswietlacz po wlaczeniu zasilania ***
 void lcd_init(void)
 {
-	// inicjowanie pin�w port�w ustalonych do pod��czenia z wy�wietlaczem LCD
-	// ustawienie wszystkich jako wyj�cia
+	// inicjowanie pinow portow ustalonych do podlaczenia z wyswietlaczem LCD
+	// ustawienie wszystkich jako wyjscia
 	data_dir_out();                       // ustawienie pinow danych jako wyjscia
 	DDR(LCD_RSPORT) |= (1<<LCD_RS);       // ustawienie pinu RS jako wyjscia
 	DDR(LCD_EPORT) |= (1<<LCD_E);         // ustawienie pinu E jako wyjscia
@@ -870,14 +892,14 @@ void lcd_init(void)
 	CLR_E;
 	_delay_us(100);
 
-	// ju� mo�na u�ywa� Busy Flag
+	// juz mozna uzywac Busy Flag
 	// tryb 4-bitowy, 2 wiersze, znak 5x7
 	lcd_write_cmd( LCDC_FUNC|LCDC_FUNC4B|LCDC_FUNC2L|LCDC_FUNC5x7 );
-	// wy��czenie kursora
+	// wylaczenie kursora
 	lcd_write_cmd( LCDC_ONOFF|LCDC_CURSOROFF );
-	// w��czenie wy�wietlacza
+	// wlaczenie wyswietlacza
 	lcd_write_cmd( LCDC_ONOFF|LCDC_DISPLAYON );
-	// przesuwanie kursora w prawo bez przesuwania zawarto�ci ekranu
+	// przesuwanie kursora w prawo bez przesuwania zawartosci ekranu
 	lcd_write_cmd( LCDC_ENTRY|LCDC_ENTRYR );
 
 	// kasowanie ekranu
@@ -930,9 +952,9 @@ lcd44780.h
 #define USE_LCD_DEFCHAR         1   // wysyla zdefiniowany znak z pamieci RAM
 #define USE_LCD_DEFCHAR_P       1   // wysyla zdefiniowany znak z pamieci FLASH
 #define USE_LCD_DEFCHAR_E       1   // wysyla zdefiniowany znak z pamieci EEPROM
-#define USE_LCD_CURSOR_ON 		1	// obsluga wlaczania/wylaczania kursora
-#define USE_LCD_CURSOR_BLINK 	1	// obsluga wlaczania/wylaczania migania kursora
-#define USE_LCD_CURSOR_HOME 	1	// ustawia kursor na pozycji poczatkowej
+#define USE_LCD_CURSOR_ON       1   // obsluga wlaczania/wylaczania kursora
+#define USE_LCD_CURSOR_BLINK 	1   // obsluga wlaczania/wylaczania migania kursora
+#define USE_LCD_CURSOR_HOME 	1   // ustawia kursor na pozycji poczatkowej
 // _____________________________________________________________________________________________________________________________
 // Definicje adresow DDRAM zaleznie od rozmiaru wyswietlacza:
 
@@ -976,30 +998,30 @@ lcd44780.h
 
 
 // Predefiniowane komendy sterujace wyswietlaczem
-#define LCDC_CLS                    0x01
-#define LCDC_HOME                   0x02
-#define LCDC_ENTRY                  0x04
+#define LCDC_CLS                        0x01
+#define LCDC_HOME                       0x02
+#define LCDC_ENTRY                      0x04
 	#define LCDC_ENTRYR             0x02
 	#define LCDC_ENTRYL             0
 	#define LCDC_MOVE               0x01
-#define LCDC_ONOFF                  0x08
+#define LCDC_ONOFF                      0x08
 	#define LCDC_DISPLAYON          0x04
 	#define LCDC_CURSORON           0x02
 	#define LCDC_CURSOROFF          0
 	#define LCDC_BLINKON            0x01
-#define LCDC_SHIFT                  0x10
+#define LCDC_SHIFT                      0x10
 	#define LCDC_SHIFTDISP          0x08
 	#define LCDC_SHIFTR             0x04
 	#define LCDC_SHIFTL             0
-#define LCDC_FUNC					0x20
+#define LCDC_FUNC                       0x20
 	#define LCDC_FUNC8B             0x10
 	#define LCDC_FUNC4B             0
 	#define LCDC_FUNC2L             0x08
 	#define LCDC_FUNC1L             0
 	#define LCDC_FUNC5x10           0x04
 	#define LCDC_FUNC5x7            0
-#define LCDC_SET_CGRAM              0x40
-#define LCDC_SET_DDRAM              0x80
+#define LCDC_SET_CGRAM                  0x40
+#define LCDC_SET_DDRAM                  0x80
 
 // Deklaracje funkcji, ktore beda dostepne w innych modulach
 void lcd_init(void);                                       // inicjalizacja wyswietlacza        - zawsze wlaczona
@@ -1020,4 +1042,4 @@ void lcd_cursor_on(void);                                  // wyswietlenie kurso
 void lcd_cursor_off(void);                                 // ukrycie kursora                   - ON/OFF
 void lcd_blink_on(void);                                   // wlaczenie migania kursora         - ON/OFF
 void lcd_blink_off(void);                                  // wylaczenie migania kursora        - ON/OFF
-#endif /* LCD_H_ */
+#endif 
