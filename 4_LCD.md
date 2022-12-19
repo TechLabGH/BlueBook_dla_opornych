@@ -12,12 +12,14 @@ albo z którego czytane dane.
 Rejestr danych może być zapisany przez MPU (jako wejście danych) lub sam układ (jako wyjście danych odczytywanych z wyświetlacza).
 
 Poniżej tabelka, która trochę lepiej wyjaśnia, jak działają linie RS i RW:
+```
  RS  RW    Operacja
 -------------------------------------------------------------------------------------
  0   0     Zapisanie do IR wewnętrznej oparacji (komendy) - np wyczyść ekran
  0   1     Odczyt flagi zajętości (DB7) i licznika adresów (AC) (DB0...DB6)
  1   0     Zapis do rejestru danych (DR)
  1   1     Odczyt z rejestru danych (DR)
+```
 
 Licznik adresów (Address counter AC) - Przechowuje adres pamięci DDRAM lub CGRAM do którego wpisujemy lub z którego czytamy dane. Po każdej takiej operacji 
 jego wartość sama się inkrementuje (przy wpisywaniu) albo dekrementuje (przy odczycie). Dzięki temu można wysłać do wyświetlacza jakiś znak wyświetlony 
@@ -28,133 +30,146 @@ teoretycznie nie każdy wymaga aż tak dużej pamięci. W pierwszych dwóch przy
 Pozostałe znaki znajdują się natomiast "na prawo" od tych wyświetlonych - jakby poza ekranem. Podczas inicjalizacji wyświetlacza, należy mu więc 
 wysłać informację, ile linii tekstu bedzie wyświetlał.
 
-Standardowe adresowanie DDRAM w HR44780:
+## Standardowe adresowanie DDRAM w HR44780:
+```
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|17|18|19|20|21|22|23|24|25|26|27|28|29|30|31|32|33|34|35|36|37|38|39|40|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |00|01|02|03|04|05|06|07|08|09|0A|0B|0C|0D|0E|0F|10|11|12|13|14|15|16|17|18|19|1A|1B|1C|1D|1E|1F|20|21|22|23|24|25|26|27|
 |40|41|42|43|44|45|46|47|48|49|4A|4B|4C|4D|4E|4F|50|51|52|53|54|55|56|57|58|59|5A|5B|5C|5D|5E|5F|60|61|62|63|64|65|66|67|
-
+```
 Zależnie od formatu wyświetlacza, pamięć ta jest różnie dzielona
 
-40x2 LCD - każdy adres pamięci DDRAM jest ściśle powiązany z jednym znakiem na wyświetlaczu
-
+###### 40x2 LCD - każdy adres pamięci DDRAM jest ściśle powiązany z jednym znakiem na wyświetlaczu
+```
 +---------------------------------------------------------+
 |00                  <--- linia 1 --->                  27|
 +---------------------------------------------------------+
 |40                  <--- linia 2 --->                  67|
 +---------------------------------------------------------+
-
-20x4 LCD
+```
+###### 20x4 LCD
 w tym przypadku pamięć zostaje dodatkowo podzielona tak:
-
+```
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|17|18|19|20|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |00|01|02|03|04|05|06|07|08|09|0A|0B|0C|0D|0E|0F|10|11|12|13|
 |40|41|42|43|44|45|46|47|48|49|4A|4B|4C|4D|4E|4F|50|51|52|53|
 |14|15|16|17|18|19|1A|1B|1C|1D|1E|1F|20|21|22|23|24|25|26|27|
 |54|55|56|57|58|59|5A|5B|5C|5D|5E|5F|60|61|62|63|64|65|66|67|
-
+```
+```
 +-------------------------++-------------------------+
 |00  <--- linia 1 --->  13||14  <--- linia 3 --->  27|
 +-------------------------++-------------------------+
 |40  <--- linia 2 --->  53||54  <--- linia 4 --->  67|
 +-------------------------++-------------------------+
-
-20x2 LCD
+```
+###### 20x2 LCD
 W tym wypadku cała pamięć jest dostępna nadal, ale znaki są wyświetlane tylko z jej fragmentu.
-
+```
 +-------------------------++-------------------------+
 |00  <--- linia 1 --->  13||14    linia 1 ukryta   27|
 +-------------------------++-------------------------+
 |40  <--- linia 2 --->  53||54    linia 2 ukryta   67|
 +-------------------------++-------------------------+
-
+```
 Znaki zapisane w adresach 14-27 i 54-67 nie są tracone i mogą być wyświetlone po wydaniu instrukcji przesunięcia (Display shift)
 
 Przesunięcie w lewo wyświetli więc znaki z rejestrów:
+```
 +-------------------------++-------------------------+
 |01  <--- linia 1 --->  14||15 linia 1 ukryta   27|00|    <<
 +-------------------------++-------------------------+
 |41  <--- linia 2 --->  54||54 linia 2 ukryta   67|40|    <<
 +-------------------------++-------------------------+
-
+```
 Przesunięcie w prawo natomiast pokaże znaki zapisane w ostatnich komórkach DDRAM
+```
 +---------------------------++-----------------------+
 |27|00 <--- linia 1 --->  12||13  linia 1 ukryta   26|    >>
 +---------------------------++-----------------------+
 |67|40 <--- linia 2 --->  52||53  linia 2 ukryta   66|    >>
 +---------------------------++-----------------------+
-
-16x1 LCD (typ 1)
+```
+###### 16x1 LCD (typ 1)
 Pomimo, że wyświetlacz ma tylko jedną linię, układ traktuje go jak dwuliniowy
 
 Na początku wyświetlane są znaki z adresów:
+```
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |00|01|02|03|04|05|06|07|40|41|42|43|44|45|46|47|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-
+```
 Nadal całe 80 bajtów jest programoiwalne, ale jeden zestaw jest używany do wyświetlania lewych, a drugi - prawych 8miu znaków
+```
 +----------------------------++-------------------------+
 |00 <--- linia 1  LEWA---> 07||08     znaki ukryte    27|
 +----------------------------++-------------------------+
 |40 <--- linia 2 PRAWA---> 47||48     znaki ukryte    67|
 +----------------------------++-------------------------+
-
+```
 Wyświetlanie na tych wyświetlaczach wymaga dodatkowych zabiegów (nie możemy wyświetlić 9 znaków na raz bez ustawiania nowego adresu dla ostatniego znaku). 
 Dodatkowo przesuięcia stają się dużo bardziej skomplikowane.
 
-16x1 LCD (typ 2)
+###### 16x1 LCD (typ 2)
 To niestety mniej popularna wersja tego wyświetlacza, natomiast dużo prostrza do kontrolowania, bo wykorzystuje tylko pierwszą linię pamięci, ale nie 
 dzieli jej dodatkowo.
+```
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |00|01|02|03|04|05|06|07|08|09|0A|0B|0C|0D|0E|0F|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-
+```
+```
 +-------------------------++-------------------------+
 |00 <---  linia 1 --->  0F||10     znaki ukryte    4F|
 +-------------------------++-------------------------+
+```
 
-
-16x2 LCD
+###### 16x2 LCD
 Tutaj mala uwaga. Sprawdzilem dwa z posiadanych wyswietlaczy 16x2 i oba maja inne rodzaje adresowania. W kodzie ponizej uzylem rozwiadania, ktore dziala 
 dla mnie, ale jesli dziala ci tylko polowa wyswietlacza, to nalezy 
 zmienic ustawienia
 
 Moj wyswietlacz:
+```
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |00|01|02|03|04|05|06|07|08|09|0A|0B|0C|0D|0E|0F|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |40|41|42|43|44|45|46|47|48|49|4A|4B|4C|4D|4E|4F|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-
+```
+```
 +-------------------------++-------------------------+
 |00  <--- linia 1 --->  0F||10    linia 1 ukryta   27|
 +-------------------------++-------------------------+
 |40  <--- linia 2 --->  4F||50    linia 2 ukryta   67|
 +-------------------------++-------------------------+
-
+```
 Drugi wyswietlacz - konfiguracja nie sprawdzona
+```
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |00|01|02|03|04|05|06|07|14|15|16|17|18|19|1A|1B|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--'
 |48|49|4A|4B|4C|4D|4E|4F|54|55|56|57|58|59|5A|5B|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-
+```
+```
 +-------------------------++-------------------------++-------------------------++-------------------------+
 |00 <--- linia 1 L ---> 0F||10   linia 1 L ukryta  13||14 <--- linia 1 R ---> 1B||1C   linia 1 R ukryta  27|
 +-------------------------++-------------------------++-------------------------++-------------------------+
 |40 <--- linia 2 L ---> 4F||50   linia 2 L ukryta  53||54 <--- linia 2 R ---> 5B||5C   linia 2 R ukryta  67|
 +-------------------------++-------------------------++-------------------------++-------------------------+
-
+```
 Takie rozlozenie DDRAM dosc bardzo komplikuje sprawe i nie chcialo mi sie tego testowac. Chyba najlatwiej byloby traktowac go jak wyswietlacz 20x4 pokazany 
 wyzej na ktorym widoczne jest tylko 8 lewych znakow, linia 3 jest
 kontynuacja pierwszej, a czwarta - drugiej.
 
-16x4 LCD
+###### 16x4 LCD
+```
 |1 |2 |3 |4 |5 |6 |7 |8 |9 |10|11|12|13|14|15|16|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |00|01|02|03|04|05|06|07|08|09|0A|0B|0C|0D|0E|0F|
@@ -165,25 +180,26 @@ kontynuacja pierwszej, a czwarta - drugiej.
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 |50|51|52|53|54|55|56|57|58|59|5A|5B|5C|5D|5E|5F|
 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-
+```
+```
 +-----------------------+-----------------------+--------------------+
 |00 <--- linia 1 ---> 0F|10 <--- linia 3 ---> 1F|20  znaki ukryte  27|
 +-----------------------+-----------------------+--------------------+
 |40 <--- linia 2 ---> 4F|50 <--- linia 4 ---> 5F|60  znaki ukryte  67|
 +-----------------------+-----------------------+--------------------+
-
+```
 Tu wprawdzie wpisuje się tekst łatwiej, ale przy przesunięciu, zawsze przesuwają się dwie linie.
 
-40x4 LCD
+###### 40x4 LCD
 W tych wyświetlaczach montowane są dwa układy HD44780. Każdy z nich kontroluje dwie linie, więc pierwsza i trzecia linia będą mieć identyczne adresowanie, 
 ale zapisywane osobno w każdym z dwóch układów. 
 
-=====================================================================================================
->>Dodatkowe znaki<<
+
+## Dodatkowe znaki
 
 Tablica ASCI zawiera 127 "znaków" - w cudzysłowie - bo pierwsze 32 (0x00-0x1F 0-31) nie są drukowalne. Dopiero znak (0x20 - 32) oznacza spację, 33 to ! ... 
 do 127 (0x7F), gdzie znajduje się DEL (wyjścietlany jako <- przez 44780).
-
+```
 0b        0x ASCI  0b        0x ASCI  0b        0x ASCI   
 00100000  20  SP   01000000  40  @    01100000  60  `
 00100001  21  !    01000001  41  A    01100001  61  a
@@ -217,6 +233,7 @@ do 127 (0x7F), gdzie znajduje się DEL (wyjścietlany jako <- przez 44780).
 00111101  3D  =    01011101  5D  ]    01111101  7D  }
 00111110  3E  >    01011110  5E  ^    01111110  7E  ->
 00111111  3F  ?    01011111  5F  _    01111111  7F  <-
+```
 
 !!! Jeśli trafisz na HD44780 z wewnętrznym romem oznaczonym A02, to do dyspozycji jest aż 240 wbudowanych znaków + 8 własnych - opcja raczej nie spotykana 
 z tanich chińskich wyświetlaczach, ale może być dostępna w jakiś z demobilu.
@@ -227,7 +244,7 @@ Oczywiście istnieje też możliwość dodania własnych znaków - w dwóch rozd
 - 5x10 (do czterech znaków) - otrzymają adresy 0x00, 0x02, 0x04, 0x06 i lustrzane 0x08, 0x0A, 0x0C i 0x0E
 
 Samo zdefiniowanie własnego znaku jest bardzo proste - przykład otwarta kłódka
-
+```
     ***        0b01110 - 0x0E
    *           0b10000 - 0x10
    *           0b10000 - 0x10
@@ -235,16 +252,17 @@ Samo zdefiniowanie własnego znaku jest bardzo proste - przykład otwarta kłód
    ** **       0b11011 - 0x18
    ** **       0b11011 - 0x18
    *****       0b11111 - 0x1F
-   
+```   
+
 Po dodaniu naszej kłódki, dostaje ona adres 0x00 i taki kod ASCI trzeba by wysłać do wyświetlacza, aby dostała ona wyświetlona. 
 Więc aby wyświetlić "Nacisnij @ aby otworzyc" (@ to miejsce naszej klodki), musimy napisać kod:
-
+```c
    char txt[] = "Nacisnij ";
    lcd_str(tab);
    lcd_write_data(0);
    txt[] = " aby otworzyc";
    lcd_str(tab);
-
+```
 Trochę to kłopotliwe - dobrze by było móc wpleść własny znak w jakiś string bez takich zabiegów. Nie możemy też użyć
 char txt[] = "Nacisnij ""\x0"" aby otworzyc"; bo kod asci 0 jest niedrukowalny. 
 
@@ -256,23 +274,22 @@ analogicznie 0x81->0x01, 0x82->0x02 itd
 właśnie temu służy tak sprytnie zapisana instrukcja if: (znak>=0x80 && znak<=87) ? (znak & 0x07) : znak - możemy ją wpleść w wywołanie funkcji lcd_write_data, 
 zamiast tworzyc osobną zmienną ustawianą w tradycyjnej instrukcji if-else.
 
-====================================================================================================================
-!!!!!!!!!!!!!
-    UWAGA
-!!!!!!!!!!!!!
+
+## UWAGA
+
 Po kompilacji i zaprogramowaniu, odczyt z pamieci EEPROM moze nie dzialac. 
 Jak to poznac?
 tekst EEPROM, ktory powinien byc odczytany z pamieci i wyswietlony nie jast, a mapa bajtow, ktora odczytana z EEPROMa powinna stworzyc znak z emotka, jest 
 cala "czarna".
-Oznacza to, ze zawartosc EEPROMu nie zostala wgrana. Podczas kompilacji w katalogu Release tworzony jest plik *.eep, ktory powinien byc zaladowany tak 
-samo jak *.hex jest
+Oznacza to, ze zawartosc EEPROMu nie zostala wgrana. Podczas kompilacji w katalogu Release tworzony jest plik .eep, ktory powinien byc zaladowany tak 
+samo jak .hex jest
 programowany w pamieci FLASH. W tym wypadku zaznaczamy projekt; Menu Project - Properties - AVR - AVRDude - zakladka Flash/EEPROM - i zaznaczamy opcje 
 Upload EEPROM image: From build.
-====================================================================================================================
 
-main.c
 
-```
+# main.c
+
+```c
 #include <avr/io.h>
 #include <avr/pgmspace.h>             // Modul z funkcjami umozliwiajacymi dostep do danych zapisanych w pamieci FLASH
 #include <avr/eeprom.h>               // Podobny modul ale dajacy obsluge danych przechowywanych w pamieci EEPROM
@@ -455,9 +472,9 @@ int main(void)
 	}
 }
 ```
-====================================================================================================================
-lcd44780.c
 
+# lcd44780.c
+```c
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <avr/eeprom.h>
@@ -907,10 +924,10 @@ void lcd_init(void)
 	// kasowanie ekranu
 	lcd_cls();
 }
-====================================================================================================================
-lcd44780.h
+```
 
-
+# lcd44780.h
+```c
 #ifndef LCD_H_
 #define LCD_H_
 
@@ -1045,3 +1062,4 @@ void lcd_cursor_off(void);                                 // ukrycie kursora   
 void lcd_blink_on(void);                                   // wlaczenie migania kursora         - ON/OFF
 void lcd_blink_off(void);                                  // wylaczenie migania kursora        - ON/OFF
 #endif 
+```
