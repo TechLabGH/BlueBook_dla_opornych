@@ -272,7 +272,7 @@ Upload EEPROM image: From build.
 
 main.c
 
-'''c
+```
 #include <avr/io.h>
 #include <avr/pgmspace.h>             // Modul z funkcjami umozliwiajacymi dostep do danych zapisanych w pamieci FLASH
 #include <avr/eeprom.h>               // Podobny modul ale dajacy obsluge danych przechowywanych w pamieci EEPROM
@@ -454,7 +454,7 @@ int main(void)
 	}
 	}
 }
-'''
+```
 ====================================================================================================================
 lcd44780.c
 
