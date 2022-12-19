@@ -1,10 +1,10 @@
 Respozytorium przykładów kodu z książki "AVR Język C - Podstawy programowania" Mirka Kardasia.
 
-Tu miałem pochwalić autora za konsekwencję w dzieleniu się wiedzą od tylu lat, jak i ostro pojechać po samej książce, 
-bo jest napisana dokładnie w tym samym stylu, z jakiego autor jest znany ;)
+**Tu miałem pochwalić autora za konsekwencję w dzieleniu się wiedzą od tylu lat, jak i ostro pojechać po samej książce, 
+bo jest napisana dokładnie w tym samym stylu, z jakiego autor jest znany ;)**
 
 Czy z książki można się dużo nauczyć? - tak
-Czy będzie łatwo? - nieeeee
+Czy będzie łatwo? - **nieeeee
 
 Respozytorium powstało z moich notatek robionych w czasie wykonywania zadań praktycznych z skiążki. Pierwsza część ksiązki -
 teoretyczna, została poparta wyłącznie znikomymi fragmentami kodu, więc dla początkującego będzie niemal nie zrozumiała, 
