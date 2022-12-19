@@ -42,7 +42,7 @@ uint8_t klawisz_wcisniety(void) {      // kod funkcji
 
 O ile idea jest prosta - wyrzucenie kodu sprawdzającego wciśnięcie przycisku poza ```main()```, to warto zwrócić uwagę na dwie rzeczy:
 
-***(\*)*** deklaracja funkcji powyżej main() - aby kompilator wiedział, że taka funcja znajduje się gdzieś i nie wyrzucił błędu
+***(\*)*** deklaracja funkcji powyżej ```main()``` - aby kompilator wiedział, że taka funcja znajduje się gdzieś i nie wyrzucił błędu
 kiedy jest ona wołana w miejscu ***(\*\*)***
 
 ***(\*\*\*)*** return 1 powoduje opuszczenie funkcji i jej dalszy kod jest pomijany
