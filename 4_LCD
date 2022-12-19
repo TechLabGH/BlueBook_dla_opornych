@@ -399,6 +399,8 @@ int main(void)
 	while(1) {
 
 	// Matrix has you
+	// kod jest zupełnie jalowy i napisany tylko i wylacznie aby moc porownac sobie kilka wyswietlaczy
+	// i tego, czy maja roznice w czasie odswierzania
 	lcd_cls();
 	lcd_locate(0,0);
 	lcd_str("The Matrix has");
