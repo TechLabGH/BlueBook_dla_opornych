@@ -1,3 +1,4 @@
+```C
 #include <avr/io.h>      // Standard include for AVR
 #include <util/delay.h>  // Delay functions
 
@@ -19,5 +20,5 @@ int main(void) {
 
 
 }
-
+```
 Omowienie poszczegolnych opeacji w nastepnym przykladzie z przyciskiem
