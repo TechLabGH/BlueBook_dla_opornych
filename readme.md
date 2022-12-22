@@ -1,9 +1,8 @@
 Respozytorium przykładów kodu z książki "AVR Język C - Podstawy programowania" Mirka Kardasia.
 
-**Tu miałem pochwalić autora za konsekwencję w dzieleniu się wiedzą od tylu lat, jak i ostro pojechać po samej książce, 
-bo jest napisana dokładnie w tym samym stylu, z jakiego autor jest znany ;)**
+_Tu miałem pochwalić autora za konsekwencję w dzieleniu się wiedzą od tylu lat, jak i ostro pojechać po samej książce, bo jest napisana dokładnie w tym samym stylu, z jakiego autor jest znany_ ;)
 
-Czy z książki można się dużo nauczyć? - tak
+Czy z książki można się dużo nauczyć? -  **tak** 
 
 Czy będzie łatwo? - **nie**
 
