@@ -197,7 +197,7 @@ void merge(void){                                                    // funkcja 
 	}
 }
 
-void sendstr(void){
+void sendstr(void){                           // funkcja wysyłająca kolejne wiersze do wyświetlacza
 	lcd_locate(0, 0);
 	lcd_str(row0);
 	lcd_locate(1, 0);
