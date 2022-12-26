@@ -126,15 +126,15 @@ int main(void)
 	                                    // (dla OC0 w ATmega32 - PB3), musi byc ustawiony jako
 	                                    // wyjscie
 
-                                        //    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |  <- rejestr TCCR0
+                                            //    | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |  <- rejestr TCCR0
 	                                    //    +---+---+---+---+---+---+---+---+
-	TCCR0 |= (1<<WGM01)|(1<<WGM00);		//    |   | 1 |   |   | 1 |   |   |   |  <- tryb Fast PWM
-	TCCR0 |= (1<<COM01);				//    |   |   | 1 |(0)|   |   |   |   |  <- clear at TOP
-	TCCR0 |= (1<<CS02)|(1<<CS00);		//    |   |   |   |   |   | 1 |(0)| 1 |  <- preskaler = 1024
+	TCCR0 |= (1<<WGM01)|(1<<WGM00);	    //    |   | 1 |   |   | 1 |   |   |   |  <- tryb Fast PWM
+	TCCR0 |= (1<<COM01);                //    |   |   | 1 |(0)|   |   |   |   |  <- clear at TOP
+	TCCR0 |= (1<<CS02)|(1<<CS00);       //    |   |   |   |   |   | 1 |(0)| 1 |  <- preskaler = 1024
 	                                    //    +---+---+---+---+---+---+---+---+
 
 	                                    // OCR0 – Output Compare Register:
-	OCR0=1;							    // Ustawienie stanu niskiego w cyklu pracy PWM
+	OCR0=1;	                            // Ustawienie stanu niskiego w cyklu pracy PWM
 
 
 	uint8_t i = 0;                      // zmienna do wypełnienia (0-255)
@@ -227,10 +227,10 @@ int main(void)
 	DDRC |= (1<<PC0)|(1<<PC1)|(1<<PC2);     // ustawienie wyjsc na trzech pinach portu C
 
 
-	TIMSK |= (1<<TOIE2); // przepelnienie licznika bedzie wywolywalo przerwanie
-	TCNT2 = 246;                    // reset licznika do 246 po przepelnieniu
-	//TCCR2 |= (1<<CS20)|(1<<CS21);   // <- preskaler 64
-	TCCR2 |= (1<<CS21);   // <- preskaler 8
+	TIMSK |= (1<<TOIE2);                    // przepelnienie licznika bedzie wywolywalo przerwanie
+	TCNT2 = 246;                            // reset licznika do 246 po przepelnieniu
+	//TCCR2 |= (1<<CS20)|(1<<CS21);         // <- preskaler 64
+	TCCR2 |= (1<<CS21);                     // <- preskaler 8
 
 
 	sei();				        // odblokowanie globalne przerwañ
