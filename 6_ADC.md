@@ -251,7 +251,7 @@ Dlaczego zadana jest wartość Vout 4.5V? Aby zabezpieczyć się, gdyby napięci
 
 Wyliczone rezystancje mnożymy x100 aby ograniczyć prąd przepływający przez dzielnik czyli potrzebujemy rezystorów 8k2 i 3k9 OHM.
 
-Kolejny przypatny wzór to:
+Kolejny przydatny wzór to:
 ```
        Vin x 1024
 ADC = ------------
