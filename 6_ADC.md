@@ -156,7 +156,7 @@ ADTS2|ADTS1|ADTS0| - |ACME|PUD|PSR2|PSR10
 |   1   |   1   |   0   |Timer/Counter1 Overflow|
 |   1   |   1   |   1   |Timer/Counter1 Capture Event|
 
-## Przykład 1
+## Przykład 0
 
 _UWAGA Kod zamieszczony w książce nie działa._
 
@@ -328,3 +328,182 @@ Jeśli wbudowany w ATmegę ADC miałby służyć choćby do monitorowania stanu 
  X = (ADC*13)/120000, gdzie 13 to współczynnik podziału, a 120000 = 12V * 10000 (patrz przykład wyżej)
 
  Tak wyliczony X zapamięta w EEPROM i będzie używał do kolejnych pomiarów.
+
+## Przykład 1
+
+
+```c
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
+#include <stdint.h>
+#include <string.h>
+#include <stdlib.h>
+
+#include "LCD/lcd44780.h"
+
+#define VREF_VCC (1<<REFS0)               // Deklaracja: Bity REFS1:0 - 01 <- wybór AVCC jako napięcie referencyjne
+                                          // Zmierzone napięcie na AREF 4.723V
+
+#define VREF_256 (1<<REFS1)|(1<<REFS0)    // Deklaracja: Bity REFS1:0 - 11 <- wybór wewnętrznego nap 2.56V
+                                          // Zmierzone napięcie na AREF 2.588V
+
+#define VREF_VCC_MUL 49                   // Współczynnik dla napięcia 4.83V (uint16_t)((4.83*1000000)/1024)
+#define VREF_256_MUL 25                   // Współczynnik dla napięcia 2.56V (uint16_t)((2.56*10000)/1024)
+
+                                          // 230 * (2.56 / 1024) * 13 = 7.47V
+                                          // 230 * 0.025         * 13 = 7.47V | *10000
+                                          // 230 * 25            * 13 = 74750
+                                          //       |
+                                          // VREF_256_MUL
+
+volatile uint32_t value;                  // Deklaracja zmiennej wartości - udczytanej z ADC
+
+//#define buf_cnt 15
+//volatile uint32_t buf[buf_cnt];
+
+uint8_t init=0;
+
+
+char liczba[10];                          // zmienna 'liczba' otrzymywana z konwersji wartości
+
+
+char *int_to_str(int val, char *str, int8_t fw, char znak_wiodacy) {
+	char *strp = str;
+	uint8_t subzero = 0;
+
+	if(val<0) {                           // jeśli liczba jest ujemna
+		val = ~val+1;                     // zaneguj i koryguj
+		subzero=1;                        // ustaw znacznik na 1
+		fw--;
+	}
+
+   do{
+      div_t divmod = div(val, 10);        // opracja dzielenia oraz modulo - wynik do struktury ldiv_t
+      //*strp++ = divmod.rem + '0';       // wstawianie cyfr od najmniej znaczącej do łańcucha
+
+      if((val == 0) && (strp != str)) {
+         *strp++ = znak_wiodacy;
+      } else {
+         *strp++ = divmod.rem + '0';
+      }
+
+      val = divmod.quot;            	// wartość zmniejsza się o jednostki, dziesiątki, setki itd
+      fw--;                     		// zmniejszenie licznika szerokości formatowanego pola
+      // wykonuj pętlę do momentu sprawdzenia ostatniej cyfry znaczącej lub zajętości całego pola
+   } while ( (fw>0));
+
+   if(subzero) *strp++ = '-';			// jeśli była to liczba ujemna, wstaw znak minus
+   *strp = 0;                     		// zakończ łańcuch zerem
+
+   strrev(str); // w związku z tym, że w łańcuchu jest odwrócona kolejność cyfr
+                // wykonaj ich zamianę
+
+   return str;  // zwróć wskaźnik do początku łańucha z liczbą
+}
+
+int main(void)
+{
+
+	lcd_init();         // Standardowo, podświetlenie LCD mam sterowane z portu PA7,
+	                    // więc do testów odłączyłem je, a port na stałe podłączyłem do VCC
+
+	ADMUX = 7;          // ADMUX to rejestr wyboru multipleksera, gdzie 5 dolnych bitów odpowiada za wybór pinu, do którego
+	                    // podłączamy mierzony sygnał (MUX4:0) - ustawienie wartości 7 ustawi 00111 na tych bitach - w ten sposób
+	                    // wybierając port PA7(ADC7) jako wejście
+
+	ADMUX |= VREF_256;  // usatwia bity REFS1:0 rejestru ADMUX jako 11 wybierając wewnętrzne napięcie referencyjne 2.56V
+
+    // Poniższe ustawienia powodują cykliczne wyzwalanie pomiaru za pomocą przerwania
+	//ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);  // ADEN=1    - Włącza ADC
+	//ADCSRA |= (1<<ADSC)|(1<<ADATE);                                 // ADIE=1    - Włącza przerwania
+	                                                                  // ADPSx=111 - Preskaler 128
+	                                                                  // ADSC=1    - Rozpoczyna konwersję
+	                                                                  // ADATE=1   - Aktywacja automatycznego włącznika ADC
+
+	// Przy poniższych ustawieniach rozpoczęcie pomiaru będzie wyzwalane przez ustawienie 1 na bicie ADCS rejestru ADCSRA
+	ADCSRA = (1<<ADEN)|(1<<ADPS2)|(1<<ADPS1)|(1<<ADPS0);              // ADEN=1    - Włącza ADC
+	                                                                  // ADPSx=111 - Preskaler 128
+
+	sei();                   // globalne włączenie przerwań
+
+	lcd_cls();               // czyść ekran
+	lcd_str("start...");     // wyświetl informację początkową
+	_delay_ms(1000);
+
+
+	uint32_t v, sr=0;        //
+
+	uint8_t czas=5;          //
+
+	uint16_t v1=0, v2=0;     // Obliczone napięcie rozbite na część całkowitą i dziesiętną, aby wyeliminować konieczność
+	                         // programowania mikrokontrolera do pracy ze zmiennymi float
+
+	while(1)
+	{
+                                                       // To jest właśnie przykład "kociego" kodu, który dodatkowo nie został
+		                                               // skomentowany, przez co jest zupełnie niezrozumiały
+		uint8_t kfil=4;                                // Co robi ta zmienna? Nie mam pojęcia, skoro nigdzie w kodzie nie
+		                                               // jest zmieniana.
+
+		ADCSRA |= (1<<ADSC);                           // rozpocznij pomiar
+		while( (ADCSRA & (1<<ADSC)) );                 // oczekuje na zakończenie pomiaru - sprawdza flagę ADSC (=0 na końcu pomiaru)
+		value = ADCW;                                  // 16bit wartość odczytana z rejestrów ADCH i ADCL
+
+		sr=kfil*sr;
+		sr=sr+value*VREF_256_MUL*100;                  // 1194 wzięło się ze współczynnika podziału wynoszącego 11.94
+                                                       // Zakładam, że współczynnik ten został wyliczony po dokładnym zmierzeniu
+		                                               // rezystancji użytych oporników, ale autor SLOWEM nie wspomniał o tym
+		                                               // ani w książce, ani w samym przykładzie.
+
+		sr=sr/(kfil+1);
+
+		v=sr;
+
+		if(!czas) {                                    // wygląda to mi wprost na to, że zutor skopiował cudzy kod i tylko go
+			lcd_locate(0,0);                           // trochę "spolonizował" - zmieniając prawdopodobnie oryginalny "time"
+			if(v1 || v2)	lcd_str("+");              // na "czas" jako zmienną, która miała wyświetlać wynik tylko co ileś "razy"
+			else lcd_str(" ");
+			v1 = v/1000000;
+			lcd_int( v1 );
+			lcd_str(".");
+
+			div_t divmod = div(v/1000, 1000);
+
+			v2 = divmod.rem;
+
+			lcd_str(int_to_str(v2, liczba, 3, '0'));
+
+	//		v2 = (v/100000)%10UL;      // Wyświetlanie innej liczby miejsc po przecinku
+	//		lcd_int( v2 );             // |
+	//		v3 = (v/10000UL)%10UL;     // |
+	//		lcd_int( v3 );             // |
+	//		v4 = (v/1000UL)%10UL;      // |
+	//		lcd_int( v4 );             // |
+
+			lcd_str(" V   ");
+
+			lcd_locate(1,0);
+			//lcd_str(long_int_to_str(v, liczba, 9, ' '));
+			czas=7;
+		} else czas--;
+
+		//lcd_locate(1,0);
+		//lcd_int( value );
+		//lcd_str("   ");
+		_delay_ms(100);
+
+
+		PORTD |= (1<<PD4);
+		_delay_ms(1);
+		PORTD &= ~(1<<PD4);
+	}
+}
+
+ISR(ADC_vect)
+{
+	//value = ADCW;
+}
+
+```
