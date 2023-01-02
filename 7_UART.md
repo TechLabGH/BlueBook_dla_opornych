@@ -1,4 +1,4 @@
-<img source="/pic/4145.p2.gif">
+<img src="https://github.com/TechLabGH/BlueBook_dla_opornych/blob/main/pic/4145.p2.gif">
 
 ATmega32 używa AVR USART - mający kilka dodatkowych funkcji w stosunku do AVR UART
 
