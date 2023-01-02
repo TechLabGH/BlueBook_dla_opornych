@@ -209,7 +209,7 @@ Dla każdego "stopnia" 10-cio bitowego wyniku otrzymanego z ADC, napięcie będz
 
 Pierwszą rzeczą, jaką należy uwzględnić, jest maksymalne napięcie, jakie potrzebujemy zmierzyć - powiedzmy, że będzie to 14V (Jakiś akumulator uwzględniając jego wyższe napięcie ładowania).
 
-Podłączenie 14v do mikrokontrolera spowoduje jego uszkodzenie, więc należy je przepuścić przez dzielnik napięcia. Zobacz skrypt [dzielnik.py] pomagający w dobraniu rezystorów do zadanych napięć wejściowych i wyjściowych. Daje on dodatkowo możliwość wyboru szeregu rezystancji i wymuszenia jednego z rezystorów.
+Podłączenie 14v do mikrokontrolera spowoduje jego uszkodzenie, więc należy je przepuścić przez dzielnik napięcia. Zobacz skrypt [dzielnik.py](https://github.com/TechLabGH/BlueBook_dla_opornych/blob/main/dzielnik.py) pomagający w dobraniu rezystorów do zadanych napięć wejściowych i wyjściowych. Daje on dodatkowo możliwość wyboru szeregu rezystancji i wymuszenia jednego z rezystorów.
 
 Poniżej przykład działania skryptu
 ```
