@@ -68,16 +68,7 @@ Parametry ramki:
 
 #### UDR – Rejestr danych we/wy USART
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-9wq8{border-color:inherit;text-align:center;vertical-align:middle}
-.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
-.tg .tg-0pky{border-color:inherit;text-align:left;vertical-align:top}
-</style><table class="tg"><thead><tr><th class="tg-0pky"></th><th class="tg-c3ow">7</th><th class="tg-c3ow">6</th><th class="tg-c3ow">5</th><th class="tg-c3ow">4</th><th class="tg-c3ow">3</th><th class="tg-c3ow">2</th><th class="tg-c3ow">1</th><th class="tg-c3ow">0</th><th class="tg-0pky"></th></tr></thead><tbody><tr><td class="tg-9wq8" rowspan="2">0x0C (0x2C)</td><td class="tg-c3ow" colspan="8">RXB[7:0]</td><td class="tg-0pky">UDR (Odczyt)</td></tr><tr><td class="tg-c3ow" colspan="8">TXB[7:0]</td><td class="tg-0pky">UDR (Zapis)</td></tr><tr><td class="tg-0pky">Zapis/Odczyt</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky"></td></tr></tbody></table>
+<table class="tg"><thead><tr><th class="tg-0pky"></th><th class="tg-c3ow">7</th><th class="tg-c3ow">6</th><th class="tg-c3ow">5</th><th class="tg-c3ow">4</th><th class="tg-c3ow">3</th><th class="tg-c3ow">2</th><th class="tg-c3ow">1</th><th class="tg-c3ow">0</th><th class="tg-0pky"></th></tr></thead><tbody><tr><td class="tg-9wq8" rowspan="2">0x0C (0x2C)</td><td class="tg-c3ow" colspan="8">RXB[7:0]</td><td class="tg-0pky">UDR (Odczyt)</td></tr><tr><td class="tg-c3ow" colspan="8">TXB[7:0]</td><td class="tg-0pky">UDR (Zapis)</td></tr><tr><td class="tg-0pky">Zapis/Odczyt</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky"></td></tr></tbody></table>
 
 #### USART – Rejestr **A** sterowania i stanu USART
 
@@ -179,16 +170,6 @@ Parametry ramki:
 
 #### UBRRL i UBRRH – Rejestry szybkości transmisji USART
 
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-baqh{text-align:center;vertical-align:top}
-.tg .tg-c3ow{border-color:inherit;text-align:center;vertical-align:top}
-.tg .tg-0lax{text-align:left;vertical-align:top}
-</style>
 <table class="tg"><thead><tr><th class="tg-c3ow">15</th>
     <th class="tg-c3ow">14</th><th class="tg-c3ow">13</th><th class="tg-c3ow">12</th><th class="tg-c3ow">11</th><th class="tg-c3ow">10</th><th class="tg-c3ow">9</th><th class="tg-baqh">8</th><th class="tg-0lax"></th></tr></thead><tbody><tr><td class="tg-c3ow">URSEL</td><td class="tg-c3ow">-</td><td class="tg-c3ow">-</td>
     <td class="tg-c3ow">-</td><td class="tg-c3ow" colspan="4">UBRR[11:8]</td><td class="tg-0lax">UBRRH</td></tr><tr><td class="tg-c3ow" colspan="8">UBRR[7:0]</td><td class="tg-0lax">UBRRL</td></tr></tbody></table>
@@ -197,19 +178,8 @@ Parametry ramki:
 
  - Bit 11:0 – UBRR11:0: Rejestr szybkości transmisji USART
 
+## Ustawienia szybkości transmisji
 
-
-<style type="text/css">
-.tg  {border-collapse:collapse;border-spacing:0;}
-.tg td{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg th{border-color:black;border-style:solid;border-width:1px;font-family:Arial, sans-serif;font-size:14px;
-  font-weight:normal;overflow:hidden;padding:10px 5px;word-break:normal;}
-.tg .tg-wa1i{font-weight:bold;text-align:center;vertical-align:middle}
-.tg .tg-nrix{text-align:center;vertical-align:middle}
-.tg .tg-7zrl{text-align:left;vertical-align:bottom}
-.tg .tg-4168{background-color:#ffce93;color:#000000;text-align:center;vertical-align:bottom}
-</style>
 <table class="tg">
 <thead>
   <tr>
