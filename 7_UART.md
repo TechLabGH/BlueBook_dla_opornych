@@ -70,7 +70,7 @@ Parametry ramki:
 
 <table class="tg"><thead><tr><th class="tg-0pky"></th><th class="tg-c3ow">7</th><th class="tg-c3ow">6</th><th class="tg-c3ow">5</th><th class="tg-c3ow">4</th><th class="tg-c3ow">3</th><th class="tg-c3ow">2</th><th class="tg-c3ow">1</th><th class="tg-c3ow">0</th><th class="tg-0pky"></th></tr></thead><tbody><tr><td class="tg-9wq8" rowspan="2">0x0C (0x2C)</td><td class="tg-c3ow" colspan="8">RXB[7:0]</td><td class="tg-0pky">UDR (Odczyt)</td></tr><tr><td class="tg-c3ow" colspan="8">TXB[7:0]</td><td class="tg-0pky">UDR (Zapis)</td></tr><tr><td class="tg-0pky">Zapis/Odczyt</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky">Z/O</td><td class="tg-0pky"></td></tr></tbody></table>
 
-#### USART – Rejestr **A** sterowania i stanu USART
+#### UCSRA – Rejestr **A** sterowania i stanu USART
 
 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
@@ -1019,3 +1019,200 @@ Parametry ramki:
 </tbody>
 </table>
 
+## Opis dzialania buforow w kodzie przykladowym
+
+<img src="https://github.com/TechLabGH/BlueBook_dla_opornych/blob/main/pic/bufory.jpg">
+
+#### main.c
+```c
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <util/delay.h>
+
+#include "uart/uart.h"
+
+
+int main(void) {
+
+	USART_Init( __UBRR );                           // Wlaczenie UARTa
+	sei();                                          // Wlaczenie przerwan
+
+	uint8_t licznik,  pm = licznik = OSCCAL-20;	    // wskaznik kalibracyjny
+	                                                // OSCCAL - jest rejestrem, gdzie przechowywane są dane
+	                                                // kalibracyjne mikrokontrolera używane do precyzyjnego ustawienia
+	                                                // wewnętrznego rezonatora. Jego rozkalibrowanie może spowodować zbyt
+	                                                // dużą ilość błędów w komunikacji UART ale np. także błędy przy zapisie do EEPROM
+
+	// petla
+	while(1) {
+
+		uart_puts("Test UART, wartosc OSCCAL = ");  // wysyla string
+		uart_putint(licznik, 10);                   // wysyla liczbe
+		uart_putc('\r');                            // wysyla CR (enter)
+		uart_putc('\n');                            // wysyla LF (nowa linia)
+		_delay_ms(500);
+		OSCCAL = licznik++;                         // powieksz wskaznik kalibracyjny
+
+		if(licznik > pm+40) licznik=pm;             // sprawdza kalibracje +/- 20
+	}
+
+}
+```
+
+#### uart.c
+```c
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include <stdlib.h>
+
+#include "uart.h"
+
+volatile char UART_RxBuf[UART_RX_BUF_SIZE];            // definicja zmiennej bufora wejsciowego
+volatile uint8_t UART_RxHead;                          // indeks początku danych
+volatile uint8_t UART_RxTail;                          // indeks konca danych
+
+volatile char UART_TxBuf[UART_TX_BUF_SIZE];            // definicja zmiennej bufora wyjsciowego
+volatile uint8_t UART_TxHead;                          // indeks poczatku danych
+volatile uint8_t UART_TxTail;                          // indeks konca danych
+
+void USART_Init( uint16_t baud ) {                     // ustaweinie predkosci
+	UBRRH = (uint8_t)(baud>>8);                        // wpisanie bitów 8-11 do rejestru UBRRH
+	UBRRL = (uint8_t)baud;                             // wpisanie bitów 0-7 do rejestru UBRRL
+	UCSRB = (1<<RXEN)|(1<<TXEN);                       // wlaczenie Rx i Tx
+
+	UCSRC = (1<<URSEL)|(3<<UCSZ0);                     // ustawienia transmisji
+	                                                   // Ustawia 1 w bicie URSEL rejestru UCSRC - oznacza zmianę zapisywaną
+	                                                   // w rejestrze UCSRC
+	                                                   // Ustawia 2 w bicie UCSZ0 rejestru UCSRC - 6 bitowa ramka
+
+	#ifdef UART_DE_PORT                                // konfiguracja pinu dla linii DE interefejsu RS485
+		UART_DE_DIR |= UART_DE_BIT;                    // kierunek linii DE konwertera RS485
+		UART_DE_ODBIERANIE;                            // usatwienie trybu odbierania jako domyślnego
+	#endif
+
+	#ifdef UART_DE_PORT                                // interefejs RS485
+		UCSRB |= (1<<RXEN)|(1<<TXEN)|(1<<RXCIE)|(1<<TXCIE);  // ustawienie dodatkowego bitu TXCIE dla interfejsu RS485
+		                                                     // bit ten wyzwala przerwanie przy zakończeniu nadawania
+	#else
+		UCSRB |= (1<<RXEN)|(1<<TXEN)|(1<<RXCIE);       // brak interfejsu RS485
+	#endif
+}
+
+#ifdef UART_DE_PORT                                    // ustawienie przerwania po zakończeniu nadawania
+ISR( USART_TXC_vect ) {                                // używane tylko do komunikacji po RS485
+  UART_DE_PORT &= ~UART_DE_BIT;	                       // blokuje nadawanie RS485
+}
+#endif
+
+void uart_putc( char data ) {                          // funkcja dodaje jeden bajt do bufora cyklicznego
+	uint8_t tmp_head;                                  // delkaracja tymczasowego indeksu początku danych
+
+    tmp_head  = (UART_TxHead + 1) & UART_TX_BUF_MASK;  // Przy pustym buforze: UART_TxHead = 0
+                                                       // UART_TX_BUF_MASK = 15 (0b1111)
+                                                       // czyli tpm_head = (1) & (15) = 1
+                                                       // Przy trzech bajtach w buforze: UART_TxHead = 3
+                                                       // czyli tmp_head = (4) & (15) = 4
+
+    while ( tmp_head == UART_TxTail ){}                // Petla oczekuje w momencie wypełnionego całkowicie bufora
+
+    UART_TxBuf[tmp_head] = data;                       // Dodanie otrzymanego w funkcji bajtu na poz tmp_head ciągu UART_TxBuf
+    UART_TxHead = tmp_head;                            // Ustawienie nowego indeksu poczatku danych
+
+    UCSRB |= (1<<UDRIE);                               // Włączamy generowanie przerwania przy pustym buforze. Przerwanie to będzie
+                                                       // powodowało wyzwolenie procedury odpowiedzialnej za
+                                                       // pobranie kolejnych bajtów z ciągu UART_TxBuf i ich wysłanie.
+}
+
+
+void uart_puts(char *s)		                           // Funkcja wysyłająca string
+{
+  register char c;
+while ((c = *s++)) uart_putc(c);			           // Funcja po prostu wywołuje uart_putc() dla kolejnych znaków do czasu
+                                                       // napotkania zera
+}
+
+void uart_putint(int value, int radix)                 // Funkcja wysyła zmienną INTIGER
+{
+	char string[17];			                       // bufor dla funkcji itoa
+	itoa(value, string, radix);		                   // konwertuje liczbę ze zmiennej INT na STRING
+	uart_puts(string);			                       // wysyła wynikowy string używając wcześniej zdefiniowanej funkcji
+}
+
+ISR( USART_UDRE_vect)  {                               // funkcja wysyłająca dane z bufora cyklicznego wywoływana przerwaniem
+
+    if ( UART_TxHead != UART_TxTail ) {                // funkcja pracuje tak długo, jak gługo indeks poczatku i końca danych są
+    	                                               // różne, co oznacza, że w UART_TxBuf[] znajdują się znaki do wysłania
+    	UART_TxTail = (UART_TxTail + 1) & UART_TX_BUF_MASK;  // Przesuwa indeks końca danych o jedną pozycję
+    	UDR = UART_TxBuf[UART_TxTail];                       // Wysyłamy ostatni znak do bufora UDR
+    } else {
+	UCSRB &= ~(1<<UDRIE);                              // po wysłaniu wszystkich znaków z UART_TxBuf[] wywoływanie przerwania
+	                                                   // pustego bufora zostaje wyłączone
+    }
+}
+
+char uart_getc(void) {                                 // funkcja pobierajaca 1 bajt z bufora wejsciowego
+
+    if ( UART_RxHead == UART_RxTail ) return 0;        // jesli indeksy sa identyczne, zwracanay jest pousty znak oznaczajacy
+                                                       // ze caly bufor zostal odczytany
+
+    UART_RxTail = (UART_RxTail + 1) & UART_RX_BUF_MASK;      // Przesuwa indeks konca danych o jedna pozycje
+    return UART_RxBuf[UART_RxTail];                          // Zwraca bajt znajdujacy sie na uaktualnionej pozycji
+}
+
+ISR( USART_RXC_vect ) {                                // obsluga przerwania odbiorczego - zapisuje dane do bufora wejsciosego
+    uint8_t tmp_head;                                  // zdefiniowanie tymczasowego indeksu poczatkowego danych
+    char data;                                         // zdefiniowanie bajtu pamieci na odebrane dane
+
+    data = UDR;                                        // pobranie danych z bufora sprzetowego i zapisanie do pamieci
+
+    tmp_head = ( UART_RxHead + 1) & UART_RX_BUF_MASK;  // obliczamy wartosc przesunietego indeksu poczatku danych i zapisujemy go
+                                                       // do tymczasowej zmiennej
+
+    if ( tmp_head == UART_RxTail ) {                   // porownujemy tymczasowy indeks konca danych z indeksem poczatku danych
+    	                                               // w przypadku, kiedy sa one identyczne - oznacza to, ze bufor zostal
+    	                                               // wypelniony i wpisywanie do niego kolejnych bajtow nadpisaloby juz
+    	                                               // istniejace w nim dane
+    } else {                                           // jesli nadal mamy miejsce w buforze to
+
+	UART_RxHead = tmp_head; 		                   // ustawiamy uaktualniony idenks poczatku danych
+	UART_RxBuf[tmp_head] = data; 	                   // wpisujemy odebrany bajt do bufora odbiorczego
+    }
+}
+
+
+```
+
+#### uart.h
+```c
+#ifndef UART_H_
+#define UART_H_
+
+
+#define UART_BAUD 115200		                            // definicja predkosci
+#define __UBRR ((F_CPU+UART_BAUD*8UL) / (16UL*UART_BAUD)-1) // blicz UBBR
+
+#define UART_DE_PORT PORTD                                  // ustawienie pinu DE dla konwertera RS 484
+#define UART_DE_DIR  DDRD                                   // ustawienie pinu DE dla konwertera RS 484
+#define UART_DE_BIT  (1<<PD2)                               // ustawienie pinu DE dla konwertera RS 484
+
+#define UART_DE_ODBIERANIE UART_DE_PORT &= ~UART_DE_BIT     // ustawienie stanu na pinie DE dla konwertera RS 484
+#define UART_DE_NADAWANIE  UART_DE_PORT |=  UART_DE_BIT     // ustawienie stanu na pinie DE dla konwertera RS 484
+                                                            // powyższe ustawienia są niepoprawne w książce, na płycie DVD, ale także
+                                                            // w przykładach wysyłanych elektronicznie nikomu nie chciało się ich
+                                                            // poprawić
+
+#define UART_RX_BUF_SIZE 32                                 // bufor wejsciowy
+#define UART_RX_BUF_MASK ( UART_RX_BUF_SIZE - 1)            // maska bufora
+
+#define UART_TX_BUF_SIZE 16                                 // bufor wyjsciowy
+#define UART_TX_BUF_MASK ( UART_TX_BUF_SIZE - 1)            // maska bufora
+
+void USART_Init( uint16_t baud );                           // definicje funkcji dostepnych przy wywolaniu biblioteki
+char uart_getc( void );                                     //
+void uart_putc( char data );                                // funkcja wysyla zmienna char
+void uart_puts( char *s );                                  // funkcja wysyla string
+void uart_putint( int value, int radix );                   // funkcja wysyla zmienną intiger
+
+#endif
+
+```
